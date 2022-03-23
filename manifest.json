@@ -1,0 +1,42 @@
+{
+  "name": "Tab Group Shortcuts",
+  "description": "Provides some keyboard shortcuts for tab groups",
+  "version": "1.0",
+  "manifest_version": 3,
+  "background": {
+      "service_worker": "background.js"
+  },
+  "commands": {
+      "new-tab-in-current-group": {
+          "description": "New tab in current tab group"
+      },
+      "toggle-group-1": {
+          "description": "Toggle first tab group"
+      },
+      "toggle-group-2": {
+          "description": "Toggle second tab group"
+      },
+      "toggle-group-3": {
+          "description": "Toggle third tab group"
+      },
+      "toggle-group-4": {
+          "description": "Toggle fourth tab group"
+      },
+      "toggle-group-5": {
+          "description": "Toggle fifth tab group"
+      },
+      "toggle-group-6": {
+          "description": "Toggle sixth tab group"
+      },
+      "toggle-group-7": {
+          "description": "Toggle seventh tab group"
+      },
+      "toggle-group-8": {
+          "description": "Toggle eigth tab group"
+      },
+      "toggle-group-9": {
+          "description": "Toggle ninth tab group"
+      }
+  },
+  "permissions": [ "tabGroups" ]
+}
