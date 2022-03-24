@@ -31,6 +31,10 @@ async function newTabInCurrentTabGroup() {
 }
 
 async function ensureOnlyOneExpandedTabGroup(expandedGroupID) {
+    if (lastActivatedTabGroup === NO_TAB_GROUP || 
+        lastActivatedTabGroupBefore === NO_TAB_GROUP) {
+        return;
+    }
     // Collapse all other groups
     const groups = await getTabGroups();
     for (const group of groups) {
@@ -116,7 +120,7 @@ chrome.tabs.onActivated.addListener(async (info) => {
                 await ensureOnlyOneExpandedTabGroup(tabInfo.groupId) 
             }, 100
         )
-    } else {
+    } else if (lastActivatedTabGroupBefore !== NO_TAB_GROUP) {
         setTimeout(
             async () => {
                 const groups = await getTabGroups();
