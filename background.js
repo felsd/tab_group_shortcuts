@@ -1,6 +1,7 @@
 const NO_TAB_GROUP = chrome.tabGroups.TAB_GROUP_ID_NONE;
 var lastActivatedTabGroup = NO_TAB_GROUP;
 var lastActivatedTabGroupBefore = NO_TAB_GROUP;
+var lastFocusedTabInTabGroup = {};
 
 Set.prototype.getByIndex = function(index) { return [...this][index]; }
 
@@ -31,10 +32,10 @@ async function newTabInCurrentTabGroup() {
 }
 
 async function ensureOnlyOneExpandedTabGroup(expandedGroupID) {
-    if (lastActivatedTabGroup === NO_TAB_GROUP || 
-        lastActivatedTabGroupBefore === NO_TAB_GROUP) {
-        return;
-    }
+    // if (lastActivatedTabGroup === NO_TAB_GROUP || 
+    //     lastActivatedTabGroupBefore === NO_TAB_GROUP) {
+    //     return;
+    // }
     // Collapse all other groups
     const groups = await getTabGroups();
     for (const group of groups) {
@@ -42,14 +43,31 @@ async function ensureOnlyOneExpandedTabGroup(expandedGroupID) {
             collapsed: group.id !== expandedGroupID 
         });
     }
-    // Activate first tab in group
-    const tabs = await chrome.tabs.query({ currentWindow: true });
-    for (const tab of tabs) {
-        if (tab.groupId === expandedGroupID) {
-            setTimeout(() => {
-                chrome.tabs.update(tab.id, { active: true });
-            }, 100);
-            break;
+    // Activate lastFocusedTabInTabGroup tab in group
+    const currentTab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+    if (currentTab.groupId !== expandedGroupID && currentTab.groupId !== NO_TAB_GROUP) {
+        const tabs = await chrome.tabs.query({ currentWindow: true });
+        // Try to activate last focused tab
+        const lastFocusedTab = lastFocusedTabInTabGroup[expandedGroupID];
+        if (lastFocusedTab != null) {
+            for (const tab of tabs) {
+                if (tab.groupId === expandedGroupID && tab.id === lastFocusedTab) {
+                    setTimeout(() => {
+                        chrome.tabs.update(tab.id, { active: true });
+                    }, 100);
+                    return;
+                    // break;
+                }
+            }
+        }
+        // Activate first tab in group
+        for (const tab of tabs) {
+            if (tab.groupId === expandedGroupID) {
+                setTimeout(() => {
+                    chrome.tabs.update(tab.id, { active: true });
+                }, 100);
+                break;
+            }
         }
     }
 }
@@ -112,9 +130,11 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 chrome.tabs.onActivated.addListener(async (info) => {
     const tabInfo = await chrome.tabs.get(info.tabId);
+    lastFocusedTabInTabGroup[tabInfo.groupId] = tabInfo.id;
     if (tabInfo.groupId === lastActivatedTabGroup) {
         return;
     } else if (tabInfo.groupId !== NO_TAB_GROUP) {
+        lastFocusedTabInTabGroup[tabInfo.groupId] = tabInfo.id;
         setTimeout(
             async () => { 
                 await ensureOnlyOneExpandedTabGroup(tabInfo.groupId) 
