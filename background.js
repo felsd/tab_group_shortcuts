@@ -32,10 +32,6 @@ async function newTabInCurrentTabGroup() {
 }
 
 async function ensureOnlyOneExpandedTabGroup(expandedGroupID) {
-    // if (lastActivatedTabGroup === NO_TAB_GROUP || 
-    //     lastActivatedTabGroupBefore === NO_TAB_GROUP) {
-    //     return;
-    // }
     // Collapse all other groups
     const groups = await getTabGroups();
     for (const group of groups) {
